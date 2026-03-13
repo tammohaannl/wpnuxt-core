@@ -16,13 +16,6 @@ export interface WPNuxtAuthPublicConfig {
   providers: AuthProvidersPublic
 }
 
-// Extend Nuxt's public runtime config
-declare module '@nuxt/schema' {
-  interface PublicRuntimeConfig {
-    wpNuxtAuth: WPNuxtAuthPublicConfig
-  }
-}
-
 export interface WPUser {
   id: string
   databaseId: number
