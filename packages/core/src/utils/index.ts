@@ -108,8 +108,68 @@ export async function mergeQueries(nuxt: Nuxt, wpNuxtConfig: WPNuxtConfig, resol
     copyGraphqlFiles(userQueryPath, queryOutputPath)
   }
 
+  // Auto-add custom content type fragments to NodeByUri query
+  await addCustomFragmentsToNodeQuery(queryOutputPath, userQueryPath, logger)
+
   logger.debug('Merged queries folder:', queryOutputPath)
   return queryOutputPath
+}
+
+/** Regex to extract fragment name and type condition from a .gql file */
+const FRAGMENT_DEF_PATTERN = /fragment\s+(\w+)\s+on\s+(\w+)/
+
+/**
+ * Scans the user's extend/queries/fragments/ directory for custom content type
+ * fragments and adds them to the NodeByUri query. This prevents "Fragment X is
+ * never used" errors from WPGraphQL when nuxt-graphql-middleware bundles all
+ * fragments into the query file.
+ *
+ * A fragment is considered a content type fragment when its name matches its
+ * type condition (e.g., `fragment Event on Event`).
+ */
+export async function addCustomFragmentsToNodeQuery(queryOutputPath: string, userQueryPath: string, logger: ConsolaInstance): Promise<void> {
+  const userFragmentsDir = join(userQueryPath, 'fragments')
+  if (!existsSync(userFragmentsDir)) return
+
+  const customFragments: { name: string, type: string }[] = []
+
+  for (const file of readdirSync(userFragmentsDir)) {
+    if (!file.endsWith('.gql') && !file.endsWith('.graphql')) continue
+
+    const content = await fsp.readFile(join(userFragmentsDir, file), 'utf-8')
+    const match = content.match(FRAGMENT_DEF_PATTERN)
+    if (!match) continue
+
+    const [, name, type] = match
+    // Content type fragments have name === type (e.g., fragment Event on Event)
+    if (name === type) {
+      customFragments.push({ name, type })
+    }
+  }
+
+  if (customFragments.length === 0) return
+
+  // Add custom fragment spreads to Node.gql
+  const nodeGqlPath = join(queryOutputPath, 'Node.gql')
+  if (!existsSync(nodeGqlPath)) return
+
+  let nodeGql = await fsp.readFile(nodeGqlPath, 'utf-8')
+
+  const spreads = customFragments
+    .map(f => `    ... on ${f.type} { ...${f.name} }`)
+    .join('\n')
+
+  // Insert before the closing braces
+  nodeGql = nodeGql.replace(
+    /(\s+\.\.\.Post)\n(\s+\}\n\})/,
+    `$1\n${spreads}\n$2`
+  )
+
+  await fsp.writeFile(nodeGqlPath, nodeGql, 'utf-8')
+
+  logger.debug(
+    `Added custom content type fragments to NodeByUri: ${customFragments.map(f => f.name).join(', ')}`
+  )
 }
 
 export function findConflicts(userQueryPath: string, outputPath: string): string[] {
