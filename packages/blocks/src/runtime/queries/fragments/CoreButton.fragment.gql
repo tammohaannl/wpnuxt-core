@@ -17,7 +17,6 @@ fragment CoreButton on CoreButton {
     style
     tagName
     text
-    textAlign
     textColor
     title
     type
