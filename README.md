@@ -5,8 +5,6 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
-> **Note:** WPNuxt v2 is currently in beta. The API is stable but may still have minor changes before the final release.
-
 A Nuxt module that seamlessly integrates WordPress with Nuxt via GraphQL (WPGraphQL), providing type-safe composables and utilities for fetching WordPress content.
 
 - [Release Notes](/CHANGELOG.md)
