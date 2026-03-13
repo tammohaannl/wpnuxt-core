@@ -52,8 +52,6 @@ node run-tests.mjs
 
 | Fixture | Nuxt Version | Dev Port |
 |---------|-------------|----------|
-| `nuxt317` | 3.17 | 3017 |
-| `nuxt3` | 3.x (latest) | 3003 |
 | `nuxt40` | 4.0 | 3040 |
 | `nuxt41` | 4.1 | 3041 |
 | `nuxt42` | 4.2 | 3042 |
@@ -115,8 +113,6 @@ e2e/
 │   ├── wordpress.spec.ts  # Tests against WordPress directly (GraphQL API)
 │   └── nuxt.spec.ts       # Tests against Nuxt app (SSR, pages, composables)
 ├── fixtures/              # Nuxt app fixtures (one per version)
-│   ├── nuxt317/
-│   ├── nuxt3/
 │   ├── nuxt40/ ... nuxt43/
 │   └── nuxt-srcdir/
 └── docker/

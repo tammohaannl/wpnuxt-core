@@ -38,7 +38,7 @@ export default defineNuxtModule<WPNuxtAuthConfig>({
     name: '@wpnuxt/auth',
     configKey: 'wpNuxtAuth',
     compatibility: {
-      nuxt: '>=3.17.0'
+      nuxt: '>=4.0.0'
     }
   },
   defaults: {

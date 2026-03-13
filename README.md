@@ -175,7 +175,7 @@ components/
 
 ## Requirements
 
-- **Nuxt 3.17+** (for older Nuxt 3, use WPNuxt 1.x)
+- **Nuxt 4.0+** (for Nuxt 3, use WPNuxt 1.x)
 - **WordPress** with [WPGraphQL](https://www.wpgraphql.com/) plugin installed
 - **Node.js 20+**
 
