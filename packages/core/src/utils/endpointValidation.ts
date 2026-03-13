@@ -85,6 +85,11 @@ Make sure WPGraphQL plugin is installed and activated on your WordPress site.`
       )
     }
 
+    // Check WPGraphQL version compatibility
+    // MediaDetails.filePath was introduced in WPGraphQL v1.32.0 (shipped alongside v2.0.0)
+    // If it's missing, the WPGraphQL version is too old for WPNuxt v2
+    await checkWPGraphQLVersion(fullUrl, headers)
+
     // If schemaPath is provided and schema doesn't exist, download it using get-graphql-schema
     if (options.schemaPath && !existsSync(options.schemaPath)) {
       try {
@@ -161,6 +166,63 @@ Error: ${err.message || 'Unknown error'}
 
 Check your wpNuxt.wordpressUrl configuration in nuxt.config.ts`
     )
+  }
+}
+
+/**
+ * Check that the WPGraphQL version is compatible with WPNuxt v2.
+ *
+ * Uses introspection to check for `MediaDetails.filePath`, a field introduced
+ * in WPGraphQL v1.32.0 (which shipped alongside v2.0.0). If it's missing,
+ * the installed WPGraphQL version is too old.
+ *
+ * @param fullUrl - The full GraphQL endpoint URL
+ * @param headers - Request headers (including auth if needed)
+ * @throws Error if WPGraphQL version is too old
+ */
+async function checkWPGraphQLVersion(
+  fullUrl: string,
+  headers: Record<string, string>
+): Promise<void> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000)
+
+    const response = await fetch(fullUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        query: '{ __type(name: "MediaDetails") { fields { name } } }'
+      }),
+      signal: controller.signal
+    })
+
+    clearTimeout(timeout)
+
+    if (!response.ok) return // Skip check if request fails — endpoint validation already handles this
+
+    const data = await response.json()
+    const fields: Array<{ name: string }> = data?.data?.__type?.fields || []
+    const hasFilePath = fields.some(f => f.name === 'filePath')
+
+    if (!hasFilePath) {
+      throw new Error(
+        `[wpnuxt:core] WPGraphQL version is too old. WPNuxt v2 requires WPGraphQL >= 2.0.0.
+
+URL: ${fullUrl}
+
+The installed WPGraphQL version does not support required schema features.
+Please update the WPGraphQL plugin on your WordPress site to version 2.0.0 or later.
+
+Download: https://wordpress.org/plugins/wp-graphql/`
+      )
+    }
+  } catch (error) {
+    // Re-throw our custom errors
+    if (error instanceof Error && error.message.startsWith('[wpnuxt:core]')) {
+      throw error
+    }
+    // Silently ignore network errors — endpoint validation already handles those
   }
 }
 
