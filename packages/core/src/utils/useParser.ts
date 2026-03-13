@@ -58,10 +58,11 @@ function processSelections(selections: readonly SelectionNode[], level: number, 
     query.nodes?.push(firstSelection.name.value.trim())
   }
 
-  // Detect if this level has both inline fields and fragment spreads
+  // Detect if this level has both custom inline fields and fragment spreads.
+  // Exclude __typename — it's a meta-field, not a custom field that needs its own type.
   const hasFragments = selections.some(s => s.kind === 'FragmentSpread')
-  const hasFields = selections.some(s => s.kind === 'Field')
-  if (hasFragments && hasFields) {
+  const hasCustomFields = selections.some(s => s.kind === 'Field' && s.name.value !== '__typename')
+  if (hasFragments && hasCustomFields) {
     query.hasInlineFields = true
   }
 
