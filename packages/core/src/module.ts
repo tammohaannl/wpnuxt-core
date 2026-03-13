@@ -143,19 +143,34 @@ export default defineNuxtModule<WPNuxtConfig>({
     // breaking mutations that rely on readBody() for variables.
     if (wpNuxtConfig.cache?.enabled !== false) {
       const maxAge = wpNuxtConfig.cache?.maxAge ?? 300
+      const swr = wpNuxtConfig.cache?.swr !== false
       const nitroOptions = nuxt.options as unknown as NuxtOptionsWithNitro
       nitroOptions.nitro = nitroOptions.nitro || {}
       nitroOptions.nitro.routeRules = nitroOptions.nitro.routeRules || {}
-      nitroOptions.nitro.routeRules['/api/wpnuxt/query/**'] = {
-        cache: {
-          maxAge,
-          swr: wpNuxtConfig.cache?.swr !== false
-        },
-        headers: {
-          'Vercel-Cache-Tag': 'wpnuxt'
+
+      const isVercel = process.env.VERCEL === '1' || nitroOptions.nitro.preset === 'vercel'
+
+      if (isVercel) {
+        // On Vercel, Nitro's internal cache is ephemeral (in-memory per serverless instance).
+        // Use Vercel-CDN-Cache-Control to cache at the CDN edge, and Vercel-Cache-Tag for targeted purging.
+        const swrValue = swr ? `, stale-while-revalidate=${maxAge}` : ''
+        nitroOptions.nitro.routeRules['/api/wpnuxt/query/**'] = {
+          headers: {
+            'Vercel-CDN-Cache-Control': `s-maxage=${maxAge}${swrValue}`,
+            'Vercel-Cache-Tag': 'wpnuxt'
+          }
         }
+        logger.debug(`Vercel CDN caching enabled for GraphQL queries (s-maxage: ${maxAge}s, SWR: ${swr})`)
+      } else {
+        // On self-hosted (Node.js), use Nitro's built-in cachedEventHandler
+        nitroOptions.nitro.routeRules['/api/wpnuxt/query/**'] = {
+          cache: {
+            maxAge,
+            swr
+          }
+        }
+        logger.debug(`Server-side caching enabled for GraphQL queries (maxAge: ${maxAge}s, SWR: ${swr})`)
       }
-      logger.debug(`Server-side caching enabled for GraphQL queries (maxAge: ${maxAge}s, SWR: ${wpNuxtConfig.cache?.swr !== false})`)
     }
 
     // Register cache revalidation webhook endpoint
