@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.0.0-beta.6](https://github.com/wpnuxt/wpnuxt/compare/v2.0.0-beta.5...v2.0.0-beta.6) (2026-03-13)
+
+### Features
+
+* add support for WordPress beta version in e2e setup ([5451364](https://github.com/wpnuxt/wpnuxt/commit/5451364d84bd0d421c7952590d4e00a01104f012))
+* add WPGraphQL version compatibility check ([ed8e452](https://github.com/wpnuxt/wpnuxt/commit/ed8e452544fe89863b495fe47f872a9296133a5b))
+* add WPGraphQL version inputs and update e2e setup ([04144c4](https://github.com/wpnuxt/wpnuxt/commit/04144c4b6e06613a8dfa6d8f4933e7ac2da379c1))
+* **core:** add __typename to NodeByUri query for discriminated unions ([c7043e1](https://github.com/wpnuxt/wpnuxt/commit/c7043e1c9e2635274ad70ae341e29ef556fd4425))
+* **core:** add cache revalidation webhook endpoint ([bd72813](https://github.com/wpnuxt/wpnuxt/commit/bd72813df08962d6448953fe2692072ae10e92df))
+* **core:** enhance cache revalidation with Vercel support ([9bb132c](https://github.com/wpnuxt/wpnuxt/commit/9bb132ca3a9543b0ae4e25ee8ed8b51e4e8c7a2f))
+* **core:** enhance caching strategy for Vercel and self-hosted environments ([274d60c](https://github.com/wpnuxt/wpnuxt/commit/274d60c22db1e40fe59902d640e202ce8751afc5))
+* **core:** improve cache revalidation function to handle content changes ([7536e79](https://github.com/wpnuxt/wpnuxt/commit/7536e7908586609d5a992813a3f9a8c22f5e8143))
+* **core:** preserve inline field types in generated composables ([9e8c399](https://github.com/wpnuxt/wpnuxt/commit/9e8c3999a8c30441021e68b39051e07d72ee5028))
+
+### Bug Fixes
+
+* **core:** exclude __typename from inline field detection ([0baed31](https://github.com/wpnuxt/wpnuxt/commit/0baed31c469d0d0f16132a497cea8356ddc0a0ee))
+
+### Refactoring
+
+* move Nuxt public runtime config augmentation to a separate file ([67da2a8](https://github.com/wpnuxt/wpnuxt/commit/67da2a829eb17bb7eaa574d2ebdc2e5f38cc0241))
+
+### Documentation
+
+* enhance caching guide with webhook revalidation setup ([41b6db8](https://github.com/wpnuxt/wpnuxt/commit/41b6db85389005cb543e9439cdb13bb2160f8aaa))
+* update caching and Vercel deployment documentation ([9c2b327](https://github.com/wpnuxt/wpnuxt/commit/9c2b32720b52b69fb51bbc6d1d2124a224c290ae))
+
+### Maintenance
+
+* improve e2e setup ([65bdbe7](https://github.com/wpnuxt/wpnuxt/commit/65bdbe7de535dac56b7b904f593aaf064ba43d47))
+* update dependencies to latest versions ([655e6c5](https://github.com/wpnuxt/wpnuxt/commit/655e6c58e6a8b75a8248642201ded33b77e71fbe))
+
 ## [2.0.0-beta.5](https://github.com/wpnuxt/wpnuxt/compare/v2.0.0-beta.4...v2.0.0-beta.5) (2026-02-18)
 
 ### Bug Fixes
