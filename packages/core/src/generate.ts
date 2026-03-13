@@ -99,29 +99,25 @@ export async function prepareContext(ctx: WPNuxtContext) {
    * - Queries without fragments: use the query's root type with path accessors
    */
   const getFragmentType = (q: WPNuxtQuery) => {
-    // If query uses fragments, derive type from fragment names
-    if (q.fragments?.length) {
-      const fragmentSuffix = q.nodes?.includes('nodes') ? '[]' : ''
-      return q.fragments.map(f => `WithImagePath<${f}Fragment>${fragmentSuffix}`).join(' | ')
+    // If query has both fragments AND inline fields, use the full query type
+    // to preserve the intersection of fragment types + custom fields
+    if (q.hasInlineFields || !q.fragments?.length) {
+      if (q.nodes?.length) {
+        let typePath = `${q.name}RootQuery`
+        for (const node of q.nodes) {
+          typePath = `NonNullable<${typePath}>['${node}']`
+        }
+        if (q.nodes.includes('nodes')) {
+          typePath = `${typePath}[number]`
+        }
+        return typePath
+      }
+      return `${q.name}RootQuery`
     }
 
-    // No fragments - use the query's root type with extraction path
-    if (q.nodes?.length) {
-      // Build type accessor path: QueryRootQuery['field1']['field2']...
-      // Use NonNullable to unwrap optional fields
-      let typePath = `${q.name}RootQuery`
-      for (const node of q.nodes) {
-        typePath = `NonNullable<${typePath}>['${node}']`
-      }
-      // If extracting from 'nodes' array, get array element type
-      if (q.nodes.includes('nodes')) {
-        typePath = `${typePath}[number]`
-      }
-      return typePath
-    }
-
-    // Fallback for queries with no nodes path
-    return `${q.name}RootQuery`
+    // Fragments only — use fragment union types
+    const fragmentSuffix = q.nodes?.includes('nodes') ? '[]' : ''
+    return q.fragments.map(f => `WithImagePath<${f}Fragment>${fragmentSuffix}`).join(' | ')
   }
 
   // Query composable expression
@@ -178,12 +174,12 @@ export async function prepareContext(ctx: WPNuxtContext) {
   const typeSet = new Set<string>()
   queries.forEach((o) => {
     typeSet.add(`${o.name}QueryVariables`)
-    if (o.fragments?.length) {
-      // Query uses fragments - import fragment types
-      o.fragments.forEach(f => typeSet.add(`${f}Fragment`))
-    } else {
-      // Query without fragments - import root query type
+    if (o.hasInlineFields || !o.fragments?.length) {
+      // Query has inline fields alongside fragments, or no fragments — import root query type
       typeSet.add(`${o.name}RootQuery`)
+    } else {
+      // Query uses fragments only — import fragment types
+      o.fragments.forEach(f => typeSet.add(`${f}Fragment`))
     }
   })
   mutations.forEach((m) => {

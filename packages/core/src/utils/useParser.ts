@@ -58,6 +58,13 @@ function processSelections(selections: readonly SelectionNode[], level: number, 
     query.nodes?.push(firstSelection.name.value.trim())
   }
 
+  // Detect if this level has both inline fields and fragment spreads
+  const hasFragments = selections.some(s => s.kind === 'FragmentSpread')
+  const hasFields = selections.some(s => s.kind === 'Field')
+  if (hasFragments && hasFields) {
+    query.hasInlineFields = true
+  }
+
   selections.forEach((s) => {
     if (s.kind === 'FragmentSpread') {
       query.fragments?.push(s.name.value.trim())
