@@ -60,3 +60,4 @@ Temporary Items
 socials
 **/.vercel/
 e2e/fixtures/**/schema.graphql
+docs/plans/
